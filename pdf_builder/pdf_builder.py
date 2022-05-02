@@ -7,7 +7,7 @@ from reportlab.pdfgen.canvas import Canvas
 from reportlab.lib.pagesizes import letter
 from reportlab.lib.enums import TA_CENTER
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
-from reportlab.platypus import Paragraph, SimpleDocTemplate, PageBreak
+from reportlab.platypus import Paragraph, SimpleDocTemplate, PageBreak, Spacer
 from reportlab.rl_config import canvas_basefontname as _baseFontName
 
 # The books of the bible
@@ -100,8 +100,24 @@ STYLENORMCENTER = ParagraphStyle(name='Normal',
 		leading=12,
 		alignment=TA_CENTER,
 )
+STYLETITLE = STYLES['Title']
+STYLETITLECENTER = ParagraphStyle(
+		name='TitleCenter',
+		parent=STYLETITLE,
+		alignment=TA_CENTER,
+)
 STYLEHEAD1 = STYLES['Heading1']
+STYLEHEAD1CENTER = ParagraphStyle(
+		name='Heading1Center',
+		parent=STYLEHEAD1,
+		alignment=TA_CENTER,
+)
 STYLEHEAD2 = STYLES['Heading2']
+STYLEHEAD2CENTER = ParagraphStyle(
+		name='Heading2Center',
+		parent=STYLEHEAD2,
+		alignment=TA_CENTER,
+)
 STYLEHEAD3 = STYLES['Heading3']
 
 bookcurr = -1
@@ -117,16 +133,37 @@ def draw_chapter_index_page(book:int):
 	parts.append(
 			Paragraph(
 				"{book}<a name='ChapterIndex{book}'/>".format(book=BOOKS[book]),
-				STYLEHEAD1))
+				STYLETITLECENTER))
+	parts.append(Spacer(0,20))
 
+	text = ""
+	paragraphs = []
+	added = 0
 	for chapter in range(chaptercounts[book]):
-		parts.append(Paragraph(
-				"<a href=#{book}{chp} color=blue>{chp}</a>".format(
-					chp=chapter+1, 
-					book=BOOKS[book],
-					),
-				STYLEHEAD3))
-				
+		text += "<a href=#{book}{chp} color=blue>{chp}</a>".format(
+				chp=chapter+1, 
+				book=BOOKS[book],
+				)
+		added += 1
+
+		if added == 5:
+			p = Paragraph(text, STYLEHEAD1CENTER)
+			p.wrap(PAGEWIDTH,0)
+			paragraphs.append(p)
+
+			added = 0
+			text = ""
+
+		elif chapter < chaptercounts[book]-1:
+			text += ",	"
+
+	parts += paragraphs
+
+
+	p = Paragraph(text, STYLEHEAD1CENTER)
+	p.wrap(PAGEWIDTH,0)
+	parts.append(p)	
+
 	parts.append(PageBreak())
 
 	return parts
@@ -218,6 +255,13 @@ def draw_book(csvtext):
 
 
 def myOnFirstPage(canvas, doc):
+	# Title
+	p = Paragraph("""Bible Index
+			<a name='BookIndex'/>""",
+			style=STYLETITLECENTER)
+	p.wrap(PAGEWIDTH,0)
+	p.drawOn(canvas, 0, PAGEHEIGHT-50)
+
 	col = 0
 	row = 0
 	i = 0
@@ -241,16 +285,13 @@ def myOnFirstPage(canvas, doc):
 		posx += centerx
 		posy += 650
 
-		p = Paragraph(
-				"""<div alignment"='center'>
-				<a name='BookIndex'/>
+		p = Paragraph("""
 				<a href=#ChapterIndex{bk} color=blue>{bk}</a>
-				</div>
 				"""
 				.format(bk=BOOKS[i]),
 				style=STYLENORMCENTER)
 		p.wrap(100,100)
-		p.drawOn(canvas, posx, posy)
+		p.drawOn(canvas, posx-50, posy)
 
 		i += 1
 
@@ -259,8 +300,8 @@ def myOnLaterPages(canvas, doc):
 	p = Paragraph(
 			"""<a href=#BookIndex color=blue>Book Index</a>""",
 			style=STYLENORMCENTER)
-	p.wrap(PAGEWIDTH,0)
-	p.drawOn(canvas, 0, PAGEHEIGHT-0)
+	p.wrap(100,0)
+	p.drawOn(canvas, PAGEWIDTH/2 - 50, PAGEHEIGHT-0)
 
 
 def verse_gen(csvtxt):
