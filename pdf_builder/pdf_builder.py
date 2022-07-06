@@ -22,12 +22,12 @@ BOOKS = [
 	"Joshua",
 	"Judges",
 	"Ruth",
-	"ISamuel",
-	"IISamuel",
-	"IKings",
-	"IIKings",
-	"IChronicles",
-	"IIChronicles",
+	"I Samuel",
+	"II Samuel",
+	"I Kings",
+	"II Kings",
+	"I Chronicles",
+	"II Chronicles",
 	"Ezra",
 	"Nehemiah",
 	"Esther",
@@ -35,8 +35,8 @@ BOOKS = [
 	"Psalms",
 	"Proverbs",
 	"Ecclesiastes",
-	"Song_of_Solomon",
-	"Isaiah",
+	"Song of Solomon",
+	"I saiah",
 	"Jeremiah",
 	"Lamentations",
 	"Ezekiel",
@@ -63,25 +63,25 @@ BOOKS = [
 	"Acts",
 	# The Epistles
 	"Romans",
-	"ICorinthians",
-	"IICorinthians",
+	"I Corinthians",
+	"II Corinthians",
 	"Galatians",
 	"Ephesians",
 	"Philippians",
 	"Colossians",
-	"IThessalonians",
-	"IIThessalonians",
-	"ITimothy",
-	"IITimothy",
+	"I Thessalonians",
+	"II Thessalonians",
+	"I Timothy",
+	"II Timothy",
 	"Titus",
 	"Philemon",
 	"Hebrews",
 	"James",
-	"IPeter",
-	"IIPeter",
-	"IJohn",
-	"IIJohn",
-	"IIIJohn",
+	"I Peter",
+	"II Peter",
+	"I John",
+	"II John",
+	"III John",
 	"Jude",
 	# Revelation
 	"Revelation",
@@ -132,7 +132,10 @@ def draw_chapter_index_page(book:int):
 	parts.append(PageBreak())
 	parts.append(
 			Paragraph(
-				"{book}<a name='ChapterIndex{book}'/>".format(book=BOOKS[book]),
+				"{book}<a name='ChapterIndex{bookid}'/>".format(
+					book=BOOKS[book],
+					bookid=BOOKS[book].replace(" ", ""),
+					),
 				STYLETITLECENTER))
 	parts.append(Spacer(0,20))
 
@@ -140,9 +143,10 @@ def draw_chapter_index_page(book:int):
 	paragraphs = []
 	added = 0
 	for chapter in range(chaptercounts[book]):
-		text += "<a href=#{book}{chp} color=blue>{chp}</a>".format(
+		text += "<a href=#{bookid}{chp} color=blue>{chp}</a>".format(
 				chp=chapter+1, 
 				book=BOOKS[book],
+				bookid=BOOKS[book].replace(" ", ""),
 				)
 		added += 1
 
@@ -221,8 +225,10 @@ def draw_book(csvtext):
 				chaptercurr = chapter
 				parts.append(
 					Paragraph(
-						"Chapter {chapter}<a name='{book}{chapter}'/>".format(
-								chapter=chaptercurr, book=BOOKS[bookcurr]),
+						"{book} {chapter}<a name='{bookid}{chapter}'/>".format(
+								chapter=chaptercurr, book=BOOKS[bookcurr],
+								bookid=BOOKS[bookcurr].replace(" ", ""),
+								),
 						STYLEHEAD3
 					)
 				)
@@ -286,9 +292,12 @@ def myOnFirstPage(canvas, doc):
 		posy += 650
 
 		p = Paragraph("""
-				<a href=#ChapterIndex{bk} color=blue>{bk}</a>
+				<a href=#ChapterIndex{bookid} color=blue>{bk}</a>
 				"""
-				.format(bk=BOOKS[i]),
+				.format(
+					bk=BOOKS[i],
+					bookid=BOOKS[i].replace(" ", ""),
+					),
 				style=STYLENORMCENTER)
 		p.wrap(100,100)
 		p.drawOn(canvas, posx-50, posy)
